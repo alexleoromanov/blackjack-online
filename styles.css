@@ -70,8 +70,9 @@ body {
     border-radius: 16px;
     border: 1px solid var(--border-color);
     backdrop-filter: blur(10px);
-    min-width: 250px;
-    min-height: 120px;
+    width: 160px; /* Narrow width forces chips to wrap, creating a vertical box */
+    max-height: calc(100vh - 300px); /* Prevents overlapping with the bank area below */
+    overflow-y: auto; /* Allows scrolling if they bet a huge number of chips */
 }
 
 .bank-area {
