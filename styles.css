@@ -1,0 +1,411 @@
+:root {
+    --bg-color: #0f172a;
+    --panel-bg: rgba(30, 41, 59, 0.7);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --accent-neon: #10b981;
+    --accent-glow: rgba(16, 185, 129, 0.5);
+    --accent-gold: #fbbf24;
+    --card-bg: #ffffff;
+    --card-text-dark: #1e293b;
+    --card-text-red: #ef4444;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-color);
+    background-image: radial-gradient(circle at 50% -20%, #1e293b 0%, var(--bg-color) 70%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    user-select: none; /* Prevents text selection when clicking quickly */
+}
+
+/* --- OVERLAY --- */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+
+.overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.btn.huge {
+    font-size: 3rem;
+    padding: 2rem 4rem;
+    border-radius: 20px;
+}
+
+/* --- BETTING AREAS --- */
+.bet-area {
+    position: fixed;
+    top: 2rem;
+    left: 2rem;
+    z-index: 100;
+    background: var(--panel-bg);
+    padding: 1rem;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+    min-width: 250px;
+    min-height: 120px;
+}
+
+.bank-area {
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
+    z-index: 100;
+    background: var(--panel-bg);
+    padding: 1rem;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+    max-width: 320px;
+}
+
+.bet-label {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.bet-label span {
+    color: var(--accent-neon);
+}
+
+.chip-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* --- CHIPS --- */
+.chip {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: 4px dashed rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.3);
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    transition: transform 0.1s ease, filter 0.2s;
+}
+
+.chip:hover {
+    transform: scale(1.1);
+    filter: brightness(1.2);
+}
+
+.chip:active {
+    transform: scale(0.95);
+}
+
+/* Chip Colors */
+.chip-1 { background-color: #94a3b8; color: #1e293b; border-color: #cbd5e1; }
+.chip-10 { background-color: #3b82f6; }
+.chip-100 { background-color: #1e293b; border-color: #475569; }
+.chip-500 { background-color: #8b5cf6; }
+.chip-1k { background-color: #f59e0b; }
+.chip-5k { background-color: #ef4444; }
+.chip-10k { background-color: #ec4899; }
+.chip-25k { background-color: #10b981; border-color: #059669; }
+
+/* In the bet area, chips stack slightly */
+#chip-container-bet {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/* --- EXISTING STYLES --- */
+.app-container {
+    width: 100%;
+    max-width: 1000px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+    margin-left: 150px; /* offset for side panels */
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+h1 {
+    font-weight: 800;
+    font-size: 2.5rem;
+    letter-spacing: -1px;
+}
+
+h1 span {
+    color: var(--accent-neon);
+    text-shadow: 0 0 15px var(--accent-glow);
+}
+
+.score-board {
+    display: flex;
+    gap: 1.5rem;
+    background: var(--panel-bg);
+    padding: 0.75rem 1.5rem;
+    border-radius: 99px;
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+}
+
+.score-item {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.score-item span {
+    color: var(--accent-gold);
+}
+
+.game-board {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+}
+
+.dealer-area, .player-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+h2 {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.score-badge {
+    background: var(--panel-bg);
+    padding: 0.25rem 0.75rem;
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-weight: 800;
+    border: 1px solid var(--border-color);
+}
+
+.cards-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    min-height: 180px;
+    perspective: 1000px;
+}
+
+.card {
+    width: 120px;
+    height: 168px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 10px;
+    font-size: 1.5rem;
+    font-weight: 800;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: dealCard 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    transform: translateY(-50px) scale(0.8);
+    opacity: 0;
+}
+
+.card.red {
+    color: var(--card-text-red);
+}
+
+.card.black {
+    color: var(--card-text-dark);
+}
+
+.card-hidden {
+    background: repeating-linear-gradient(
+        45deg,
+        #1e293b,
+        #1e293b 10px,
+        #0f172a 10px,
+        #0f172a 20px
+    );
+    border: 2px solid var(--border-color);
+    color: transparent;
+}
+
+.card-hidden .suit, .card-hidden .value {
+    display: none;
+}
+
+.card .top-left {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1;
+}
+
+.card .bottom-right {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1;
+    transform: rotate(180deg);
+}
+
+.card .center-suit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3.5rem;
+    opacity: 0.2;
+}
+
+@keyframes dealCard {
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.game-message-container {
+    text-align: center;
+    margin: 2rem 0;
+}
+
+#game-message {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--accent-gold);
+    min-height: 2rem;
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn {
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+    font-weight: 800;
+    font-family: inherit;
+    border-radius: 12px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.btn.primary {
+    background: var(--accent-neon);
+    color: #000;
+    box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+.btn.primary:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--accent-glow);
+    background: #34d399;
+}
+
+.btn.secondary {
+    background: var(--panel-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+}
+
+.btn.secondary:not(:disabled):hover {
+    background: rgba(51, 65, 85, 0.8);
+    transform: translateY(-2px);
+}
+
+/* Mobile responsive */
+@media (max-width: 900px) {
+    .app-container {
+        margin-left: 0;
+        padding-top: 150px; /* room for bets on top */
+    }
+    .bank-area {
+        bottom: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: none;
+    }
+    .bet-area {
+        top: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+    }
+    .card {
+        width: 80px;
+        height: 112px;
+        font-size: 1rem;
+    }
+    .card .center-suit {
+        font-size: 2rem;
+    }
+}
