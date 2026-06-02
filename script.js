@@ -51,7 +51,7 @@ function initGame() {
     bankChips.forEach(chip => {
         chip.addEventListener('click', () => {
             if (!gameOver && playerHand.length > 0) return; // Can't bet mid-game
-            placeBet(parseInt(chip.getAttribute('data-value')), chip.className, chip.textContent);
+            placeBet(parseInt(chip.getAttribute('data-value')), chip.className, chip.querySelector('span').textContent);
         });
     });
 }
@@ -59,6 +59,8 @@ function initGame() {
 function updateBetUI() {
     balanceEl.textContent = balance;
     currentBetEl.textContent = currentBet;
+    
+    // Enable Deal if game is over AND they have a bet placed (including from last round)
     btnDeal.disabled = currentBet === 0 || !gameOver;
     
     if (balance === 0 && currentBet === 0 && gameOver) {
@@ -93,7 +95,7 @@ function placeBet(value, className, text) {
         // Add chip to bet area
         const betChip = document.createElement('div');
         betChip.className = className;
-        betChip.textContent = text;
+        betChip.innerHTML = `<span>${text}</span>`;
         betChip.setAttribute('data-value', value);
         
         // Right Click to Remove Bet
@@ -254,33 +256,35 @@ function endGame(message, result) {
     gameOver = true;
     gameMessageEl.textContent = message;
     
+    // Disable deal button immediately while we show the result
     btnHit.disabled = true;
     btnStand.disabled = true;
-    btnDeal.disabled = false; // Deal button depends on currentBet now
+    btnDeal.disabled = true; 
     
-    if (result === "win") {
-        wins++;
-        winsCountEl.textContent = wins;
-        balance += (currentBet * 2);
-    } else if (result === "blackjack") {
-        wins++;
-        winsCountEl.textContent = wins;
-        balance += (currentBet * 2.5); // 3:2 payout (return bet + 1.5x bet)
-    } else if (result === "loss") {
-        losses++;
-        lossesCountEl.textContent = losses;
-    } else if (result === "push") {
-        pushes++;
-        pushesCountEl.textContent = pushes;
-        balance += currentBet; // return bet
-    }
-    
-    // Clear bet for next round
-    currentBet = 0;
-    chipContainerBet.innerHTML = '';
-    
-    // Slight delay before updating UI to let user read message
-    setTimeout(updateBetUI, 1000);
+    // Delay the payout and UI reset so the user sees the final cards
+    setTimeout(() => {
+        if (result === "win") {
+            wins++;
+            winsCountEl.textContent = wins;
+            balance += currentBet; // Winnings added, bet stays on table
+        } else if (result === "blackjack") {
+            wins++;
+            winsCountEl.textContent = wins;
+            balance += (currentBet * 1.5); // 3:2 Winnings added, bet stays on table
+        } else if (result === "loss") {
+            losses++;
+            lossesCountEl.textContent = losses;
+            currentBet = 0;
+            chipContainerBet.innerHTML = '';
+        } else if (result === "push") {
+            pushes++;
+            pushesCountEl.textContent = pushes;
+            // Bet stays on table
+        }
+        
+        // updateBetUI will re-enable btnDeal if currentBet > 0
+        updateBetUI();
+    }, 1000);
 }
 
 // Start

@@ -28,7 +28,7 @@ body {
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    user-select: none; /* Prevents text selection when clicking quickly */
+    user-select: none;
 }
 
 /* --- OVERLAY --- */
@@ -106,42 +106,50 @@ body {
 
 /* --- CHIPS --- */
 .chip {
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-weight: 800;
-    font-size: 0.9rem;
     cursor: pointer;
-    border: 4px dashed rgba(255, 255, 255, 0.5);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.3);
-    color: #fff;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    position: relative;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.4);
+    border: 1px solid rgba(0,0,0,0.3);
     transition: transform 0.1s ease, filter 0.2s;
+    background: 
+        radial-gradient(circle, #ffffff 0%, #ffffff 50%, transparent 51%), 
+        radial-gradient(circle, transparent 0%, transparent 80%, var(--chip-color) 81%), 
+        repeating-conic-gradient(var(--chip-color) 0deg 22.5deg, var(--stripe-color) 22.5deg 45deg);
+}
+
+.chip span {
+    position: relative;
+    z-index: 10;
+    color: #000;
+    font-weight: 800;
+    font-size: 1.2rem;
 }
 
 .chip:hover {
     transform: scale(1.1);
-    filter: brightness(1.2);
+    filter: brightness(1.1);
 }
 
 .chip:active {
     transform: scale(0.95);
 }
 
-/* Chip Colors */
-.chip-1 { background-color: #94a3b8; color: #1e293b; border-color: #cbd5e1; }
-.chip-10 { background-color: #3b82f6; }
-.chip-100 { background-color: #1e293b; border-color: #475569; }
-.chip-500 { background-color: #8b5cf6; }
-.chip-1k { background-color: #f59e0b; }
-.chip-5k { background-color: #ef4444; }
-.chip-10k { background-color: #ec4899; }
-.chip-25k { background-color: #10b981; border-color: #059669; }
+/* Chip Colors based on standard casino colors */
+.chip-1 { --chip-color: #94a3b8; --stripe-color: #ffffff; }
+.chip-10 { --chip-color: #0369a1; --stripe-color: #ffffff; }
+.chip-100 { --chip-color: #1e293b; --stripe-color: #ffffff; }
+.chip-500 { --chip-color: #0ea5e9; --stripe-color: #ffffff; }
+.chip-1k { --chip-color: #f59e0b; --stripe-color: #ffffff; }
+.chip-5k { --chip-color: #ef4444; --stripe-color: #ffffff; }
+.chip-10k { --chip-color: #ec4899; --stripe-color: #ffffff; }
+.chip-25k { --chip-color: #10b981; --stripe-color: #ffffff; }
 
-/* In the bet area, chips stack slightly */
 #chip-container-bet {
     display: flex;
     flex-wrap: wrap;
@@ -155,7 +163,7 @@ body {
     display: flex;
     flex-direction: column;
     padding: 2rem;
-    margin-left: 150px; /* offset for side panels */
+    margin-left: 150px;
 }
 
 header {
@@ -381,11 +389,10 @@ h2 {
     transform: translateY(-2px);
 }
 
-/* Mobile responsive */
 @media (max-width: 900px) {
     .app-container {
         margin-left: 0;
-        padding-top: 150px; /* room for bets on top */
+        padding-top: 150px;
     }
     .bank-area {
         bottom: 1rem;
