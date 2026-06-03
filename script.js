@@ -320,10 +320,10 @@ function moveToNextHand() {
 }
 
 function playDealerTurn() {
-    gameOver = true;
     btnHit.disabled = true;
     btnStand.disabled = true;
     btnSplit.disabled = true;
+    btnDeal.disabled = true;
     
     // Check if ALL hands busted. If they did, dealer doesn't need to hit.
     const allBusted = playerHands.every(h => h.status === 'busted');
@@ -371,20 +371,19 @@ function determineWinners() {
     lossesCountEl.textContent = losses;
     pushesCountEl.textContent = pushes;
     
-    gameMessageEl.textContent = "Round Over! Total Winnings: $" + totalWon;
-    
-    // Always clear the table after a hand
-    currentBet = 0;
-    chipContainerBet.innerHTML = '';
-    
     setTimeout(() => {
+        gameOver = true; // NOW betting is allowed again
+        currentBet = 0;
+        chipContainerBet.innerHTML = '';
+        
+        gameMessageEl.textContent = "Round Over! Total Winnings: $" + totalWon + ". Place your bet!";
+        
         updateBetUI();
         renderHands(); // re-render to show updated win/loss status on each hand
     }, 1000);
 }
 
 function processRoundOver(message) {
-    gameOver = true;
     btnHit.disabled = true;
     btnStand.disabled = true;
     btnSplit.disabled = true;
