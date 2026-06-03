@@ -266,23 +266,26 @@ function endGame(message, result) {
         if (result === "win") {
             wins++;
             winsCountEl.textContent = wins;
-            balance += currentBet; // Winnings added, bet stays on table
+            balance += (currentBet * 2); // Original bet + 1x winnings back to bank
         } else if (result === "blackjack") {
             wins++;
             winsCountEl.textContent = wins;
-            balance += (currentBet * 1.5); // 3:2 Winnings added, bet stays on table
+            balance += (currentBet * 2.5); // Original bet + 1.5x winnings back to bank
         } else if (result === "loss") {
             losses++;
             lossesCountEl.textContent = losses;
-            currentBet = 0;
-            chipContainerBet.innerHTML = '';
+            // Bet is already deducted from balance, so nothing to add
         } else if (result === "push") {
             pushes++;
             pushesCountEl.textContent = pushes;
-            // Bet stays on table
+            balance += currentBet; // Original bet back to bank
         }
         
-        // updateBetUI will re-enable btnDeal if currentBet > 0
+        // Always clear the table after a hand
+        currentBet = 0;
+        chipContainerBet.innerHTML = '';
+        
+        // updateBetUI will run, Deal button will be disabled until a new bet is placed
         updateBetUI();
     }, 1000);
 }
