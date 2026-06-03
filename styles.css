@@ -417,3 +417,40 @@ h2 {
         font-size: 2rem;
     }
 }
+
+/* Multiple hands for splitting */
+#player-cards {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.hand-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-radius: 16px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.hand-container.active-hand {
+    border-color: var(--accent-neon);
+    background: rgba(16, 185, 129, 0.1);
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+    transform: scale(1.05);
+}
+
+.hand-score {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--accent-gold);
+    margin-bottom: 0.5rem;
+}
+
+.hand-container .cards-container {
+    min-height: 180px;
+}

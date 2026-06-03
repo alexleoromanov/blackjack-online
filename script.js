@@ -1,8 +1,8 @@
 // Game State
 let deck = [];
-let playerHand = [];
+let playerHands = []; // Array of { cards: [], status: 'active'|'busted'|'stood'|'blackjack'|'win'|'loss'|'push', bet: number }
 let dealerHand = [];
-let playerScore = 0;
+let activeHandIndex = 0;
 let dealerScore = 0;
 let wins = 0;
 let losses = 0;
@@ -17,11 +17,11 @@ let currentBet = 0;
 const dealerCardsEl = document.getElementById('dealer-cards');
 const playerCardsEl = document.getElementById('player-cards');
 const dealerScoreEl = document.getElementById('dealer-score');
-const playerScoreEl = document.getElementById('player-score');
 const gameMessageEl = document.getElementById('game-message');
 const btnDeal = document.getElementById('btn-deal');
 const btnHit = document.getElementById('btn-hit');
 const btnStand = document.getElementById('btn-stand');
+const btnSplit = document.getElementById('btn-split');
 const winsCountEl = document.getElementById('wins-count');
 const lossesCountEl = document.getElementById('losses-count');
 const pushesCountEl = document.getElementById('pushes-count');
@@ -44,13 +44,13 @@ function initGame() {
     btnDeal.addEventListener('click', startNewGame);
     btnHit.addEventListener('click', playerHit);
     btnStand.addEventListener('click', playerStand);
+    btnSplit.addEventListener('click', splitHand);
     btnNewGame.addEventListener('click', resetFullGame);
     
-    // Add event listeners to bank chips (Left Click to Bet)
     const bankChips = chipContainerBank.querySelectorAll('.chip');
     bankChips.forEach(chip => {
         chip.addEventListener('click', () => {
-            if (!gameOver && playerHand.length > 0) return; // Can't bet mid-game
+            if (!gameOver && playerHands.length > 0) return;
             placeBet(parseInt(chip.getAttribute('data-value')), chip.className, chip.querySelector('span').textContent);
         });
     });
@@ -60,7 +60,6 @@ function updateBetUI() {
     balanceEl.textContent = balance;
     currentBetEl.textContent = currentBet;
     
-    // Enable Deal if game is over AND they have a bet placed (including from last round)
     btnDeal.disabled = currentBet === 0 || !gameOver;
     
     if (balance === 0 && currentBet === 0 && gameOver) {
@@ -92,16 +91,14 @@ function placeBet(value, className, text) {
         balance -= value;
         currentBet += value;
         
-        // Add chip to bet area
         const betChip = document.createElement('div');
         betChip.className = className;
         betChip.innerHTML = `<span>${text}</span>`;
         betChip.setAttribute('data-value', value);
         
-        // Right Click to Remove Bet
         betChip.addEventListener('contextmenu', (e) => {
-            e.preventDefault(); // Prevent default right-click menu
-            if (!gameOver && playerHand.length > 0) return; // Can't remove bet mid-game
+            e.preventDefault();
+            if (!gameOver && playerHands.length > 0) return; 
             removeBet(betChip, value);
         });
         
@@ -117,7 +114,6 @@ function removeBet(chipElement, value) {
     updateBetUI();
 }
 
-// Create a new deck of 52 cards
 function createDeck() {
     deck = [];
     for (let suit of suits) {
@@ -143,7 +139,12 @@ function startNewGame() {
     createDeck();
     shuffleDeck();
     
-    playerHand = [deck.pop(), deck.pop()];
+    playerHands = [{
+        cards: [deck.pop(), deck.pop()],
+        status: 'active',
+        bet: currentBet
+    }];
+    activeHandIndex = 0;
     dealerHand = [deck.pop(), deck.pop()];
     
     gameOver = false;
@@ -151,11 +152,13 @@ function startNewGame() {
     btnDeal.disabled = true;
     btnHit.disabled = false;
     btnStand.disabled = false;
+    btnSplit.disabled = true;
     
-    gameMessageEl.textContent = "Your turn! Hit or Stand?";
+    gameMessageEl.textContent = "Your turn! Hit, Stand, or Split?";
     
     renderHands();
-    checkBlackjack();
+    checkSplitAvailability();
+    checkInitialBlackjack();
 }
 
 function calculateScore(hand) {
@@ -194,10 +197,30 @@ function renderHands() {
     dealerCardsEl.innerHTML = '';
     playerCardsEl.innerHTML = '';
     
-    playerScore = calculateScore(playerHand);
-    playerScoreEl.textContent = playerScore;
-    playerHand.forEach(card => playerCardsEl.appendChild(createCardElement(card)));
+    // Render Player Hands
+    playerHands.forEach((hand, index) => {
+        const handScore = calculateScore(hand.cards);
+        
+        const handDiv = document.createElement('div');
+        handDiv.className = 'hand-container';
+        if (index === activeHandIndex && !gameOver) {
+            handDiv.classList.add('active-hand');
+        }
+        
+        const scoreDiv = document.createElement('div');
+        scoreDiv.className = 'hand-score';
+        scoreDiv.textContent = `Hand ${index + 1}: ${handScore} ${hand.status !== 'active' ? `(${hand.status.toUpperCase()})` : ''}`;
+        
+        const cardsDiv = document.createElement('div');
+        cardsDiv.className = 'cards-container';
+        hand.cards.forEach(card => cardsDiv.appendChild(createCardElement(card)));
+        
+        handDiv.appendChild(scoreDiv);
+        handDiv.appendChild(cardsDiv);
+        playerCardsEl.appendChild(handDiv);
+    });
     
+    // Render Dealer
     dealerScore = calculateScore(dealerHand);
     if (gameOver) {
         dealerScoreEl.textContent = dealerScore;
@@ -209,84 +232,163 @@ function renderHands() {
     }
 }
 
-function playerHit() {
-    playerHand.push(deck.pop());
+function checkSplitAvailability() {
+    if (gameOver || activeHandIndex >= playerHands.length) {
+        btnSplit.disabled = true;
+        return;
+    }
+    
+    const activeHand = playerHands[activeHandIndex];
+    if (activeHand.cards.length === 2 && 
+        activeHand.cards[0].value === activeHand.cards[1].value && 
+        balance >= activeHand.bet) {
+        btnSplit.disabled = false;
+    } else {
+        btnSplit.disabled = true;
+    }
+}
+
+function splitHand() {
+    const activeHand = playerHands[activeHandIndex];
+    
+    // Deduct the secondary bet from balance
+    balance -= activeHand.bet;
+    updateBetUI();
+    
+    const card1 = activeHand.cards[0];
+    const card2 = activeHand.cards[1];
+    
+    const newHand1 = { cards: [card1, deck.pop()], status: 'active', bet: activeHand.bet };
+    const newHand2 = { cards: [card2, deck.pop()], status: 'active', bet: activeHand.bet };
+    
+    // Replace current hand with the two new split hands
+    playerHands.splice(activeHandIndex, 1, newHand1, newHand2);
+    
     renderHands();
-    if (calculateScore(playerHand) > 21) endGame("Player Busts! Dealer Wins.", "loss");
+    checkSplitAvailability();
+}
+
+function checkInitialBlackjack() {
+    if (playerHands.length === 1) {
+        const pScore = calculateScore(playerHands[0].cards);
+        const dScore = calculateScore(dealerHand);
+        
+        if (pScore === 21 && dScore === 21) {
+            playerHands[0].status = 'push';
+            processRoundOver("Double Blackjack! It's a Push.");
+        } else if (pScore === 21) {
+            playerHands[0].status = 'blackjack';
+            processRoundOver("Blackjack! Player Wins 3:2!");
+        } else if (dScore === 21) {
+            playerHands[0].status = 'loss';
+            processRoundOver("Dealer Blackjack! Dealer Wins.");
+        }
+    }
+}
+
+function playerHit() {
+    const hand = playerHands[activeHandIndex];
+    hand.cards.push(deck.pop());
+    renderHands();
+    
+    if (calculateScore(hand.cards) > 21) {
+        hand.status = 'busted';
+        moveToNextHand();
+    } else {
+        checkSplitAvailability();
+    }
 }
 
 function playerStand() {
+    playerHands[activeHandIndex].status = 'stood';
+    moveToNextHand();
+}
+
+function moveToNextHand() {
+    if (activeHandIndex < playerHands.length - 1) {
+        activeHandIndex++;
+        renderHands();
+        checkSplitAvailability();
+    } else {
+        playDealerTurn();
+    }
+}
+
+function playDealerTurn() {
     gameOver = true;
     btnHit.disabled = true;
     btnStand.disabled = true;
-    while (calculateScore(dealerHand) < 17) {
-        dealerHand.push(deck.pop());
+    btnSplit.disabled = true;
+    
+    // Check if ALL hands busted. If they did, dealer doesn't need to hit.
+    const allBusted = playerHands.every(h => h.status === 'busted');
+    
+    if (!allBusted) {
+        while (calculateScore(dealerHand) < 17) {
+            dealerHand.push(deck.pop());
+        }
     }
+    
     renderHands();
-    determineWinner();
+    determineWinners();
 }
 
-function checkBlackjack() {
-    playerScore = calculateScore(playerHand);
-    dealerScore = calculateScore(dealerHand);
-    
-    if (playerScore === 21 && dealerScore === 21) {
-        renderHands();
-        endGame("Double Blackjack! It's a Push.", "push");
-    } else if (playerScore === 21) {
-        renderHands();
-        endGame("Blackjack! Player Wins 3:2!", "blackjack");
-    } else if (dealerScore === 21) {
-        renderHands();
-        endGame("Dealer Blackjack! Dealer Wins.", "loss");
-    }
-}
-
-function determineWinner() {
-    const pScore = calculateScore(playerHand);
+function determineWinners() {
     const dScore = calculateScore(dealerHand);
+    let totalWon = 0;
     
-    if (dScore > 21) endGame("Dealer Busts! Player Wins!", "win");
-    else if (pScore > dScore) endGame("Player Wins!", "win");
-    else if (dScore > pScore) endGame("Dealer Wins!", "loss");
-    else endGame("It's a Push!", "push");
+    // Loop through all hands and evaluate payouts
+    playerHands.forEach(hand => {
+        if (hand.status === 'blackjack') {
+            totalWon += (hand.bet * 2.5);
+            wins++;
+        } else if (hand.status === 'busted') {
+            losses++;
+        } else {
+            const hScore = calculateScore(hand.cards);
+            if (dScore > 21 || hScore > dScore) {
+                totalWon += (hand.bet * 2);
+                wins++;
+                hand.status = 'win';
+            } else if (dScore > hScore) {
+                losses++;
+                hand.status = 'loss';
+            } else {
+                totalWon += hand.bet;
+                pushes++;
+                hand.status = 'push';
+            }
+        }
+    });
+    
+    balance += totalWon;
+    winsCountEl.textContent = wins;
+    lossesCountEl.textContent = losses;
+    pushesCountEl.textContent = pushes;
+    
+    gameMessageEl.textContent = "Round Over! Total Winnings: $" + totalWon;
+    
+    // Always clear the table after a hand
+    currentBet = 0;
+    chipContainerBet.innerHTML = '';
+    
+    setTimeout(() => {
+        updateBetUI();
+        renderHands(); // re-render to show updated win/loss status on each hand
+    }, 1000);
 }
 
-function endGame(message, result) {
+function processRoundOver(message) {
     gameOver = true;
-    gameMessageEl.textContent = message;
-    
-    // Disable deal button immediately while we show the result
     btnHit.disabled = true;
     btnStand.disabled = true;
+    btnSplit.disabled = true;
     btnDeal.disabled = true; 
     
-    // Delay the payout and UI reset so the user sees the final cards
+    gameMessageEl.textContent = message;
+    
     setTimeout(() => {
-        if (result === "win") {
-            wins++;
-            winsCountEl.textContent = wins;
-            balance += (currentBet * 2); // Original bet + 1x winnings back to bank
-        } else if (result === "blackjack") {
-            wins++;
-            winsCountEl.textContent = wins;
-            balance += (currentBet * 2.5); // Original bet + 1.5x winnings back to bank
-        } else if (result === "loss") {
-            losses++;
-            lossesCountEl.textContent = losses;
-            // Bet is already deducted from balance, so nothing to add
-        } else if (result === "push") {
-            pushes++;
-            pushesCountEl.textContent = pushes;
-            balance += currentBet; // Original bet back to bank
-        }
-        
-        // Always clear the table after a hand
-        currentBet = 0;
-        chipContainerBet.innerHTML = '';
-        
-        // updateBetUI will run, Deal button will be disabled until a new bet is placed
-        updateBetUI();
+        determineWinners();
     }, 1000);
 }
 
