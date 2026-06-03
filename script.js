@@ -154,10 +154,15 @@ function startNewGame() {
     btnStand.disabled = false;
     btnSplit.disabled = true;
     
-    gameMessageEl.textContent = "Your turn! Hit, Stand, or Split?";
-    
     renderHands();
     checkSplitAvailability();
+    
+    if (!btnSplit.disabled) {
+        gameMessageEl.textContent = "Your turn! Hit, Stand, or Split?";
+    } else {
+        gameMessageEl.textContent = "Your turn! Hit or Stand?";
+    }
+    
     checkInitialBlackjack();
 }
 
