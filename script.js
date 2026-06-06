@@ -2,6 +2,7 @@
 const mainMenu = document.getElementById('main-menu');
 const gameScreen = document.getElementById('game-screen');
 const btnMenuContinue = document.getElementById('btn-menu-continue');
+const btnMenuDelete = document.getElementById('btn-menu-delete');
 const btnMenuNew = document.getElementById('btn-menu-new');
 
 // ====== GAME STATE ======
@@ -144,8 +145,9 @@ function showMenu() {
     mainMenu.classList.remove('hidden');
     gameScreen.classList.add('hidden');
 
-    // Enable continue only if a save exists
-    btnMenuContinue.disabled = !hasSave();
+    const saveExists = hasSave();
+    btnMenuContinue.disabled = !saveExists;
+    btnMenuDelete.disabled = !saveExists;
 }
 
 function showGame() {
@@ -156,6 +158,13 @@ function showGame() {
 btnMenuContinue.addEventListener('click', () => {
     showGame();
     loadGame();
+});
+
+btnMenuDelete.addEventListener('click', () => {
+    clearSave();
+    // Update button states without leaving the menu
+    btnMenuContinue.disabled = true;
+    btnMenuDelete.disabled = true;
 });
 
 btnMenuNew.addEventListener('click', () => {
