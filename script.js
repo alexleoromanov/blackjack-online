@@ -343,6 +343,16 @@ function doubleDown() {
     btnDouble.disabled = true;
     btnSplit.disabled = true;
     
+    // Visually clone all current bet chips and add them to the bet area
+    const existingChips = Array.from(chipContainerBet.querySelectorAll('.chip'));
+    existingChips.forEach(chip => {
+        const clone = chip.cloneNode(true);
+        const value = parseInt(clone.getAttribute('data-value'));
+        clone.addEventListener('contextmenu', (e) => e.preventDefault()); // no removing during game
+        chipContainerBet.appendChild(clone);
+        currentBet += value;
+    });
+    
     // Draw exactly one card then auto-stand
     hand.cards.push(deck.pop());
     renderHands();
