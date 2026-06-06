@@ -1,6 +1,12 @@
-// Game State
+// ====== DOM: MENU ======
+const mainMenu = document.getElementById('main-menu');
+const gameScreen = document.getElementById('game-screen');
+const btnMenuContinue = document.getElementById('btn-menu-continue');
+const btnMenuNew = document.getElementById('btn-menu-new');
+
+// ====== GAME STATE ======
 let deck = [];
-let playerHands = []; // Array of { cards: [], status: 'active'|'busted'|'stood'|'blackjack'|'win'|'loss'|'push', bet: number }
+let playerHands = [];
 let dealerHand = [];
 let activeHandIndex = 0;
 let dealerScore = 0;
@@ -8,13 +14,13 @@ let wins = 0;
 let losses = 0;
 let pushes = 0;
 let gameOver = true;
-let hasDoubledDown = false; // Can only double once per full game
+let hasDoubledDown = false;
 
 // Betting State
 let balance = 250;
 let currentBet = 0;
 
-// DOM Elements
+// ====== DOM: GAME ======
 const dealerCardsEl = document.getElementById('dealer-cards');
 const playerCardsEl = document.getElementById('player-cards');
 const dealerScoreEl = document.getElementById('dealer-score');
@@ -28,7 +34,6 @@ const winsCountEl = document.getElementById('wins-count');
 const lossesCountEl = document.getElementById('losses-count');
 const pushesCountEl = document.getElementById('pushes-count');
 
-// Betting DOM Elements
 const balanceEl = document.getElementById('current-balance');
 const currentBetEl = document.getElementById('current-bet');
 const chipContainerBank = document.getElementById('chip-container-bank');
@@ -36,20 +41,146 @@ const chipContainerBet = document.getElementById('chip-container-bet');
 const gameOverOverlay = document.getElementById('game-over-overlay');
 const btnNewGame = document.getElementById('btn-new-game');
 
-// Card values and suits
+// ====== CARD DATA ======
 const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
 const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
 const suitSymbols = { 'hearts': '♥', 'diamonds': '♦', 'clubs': '♣', 'spades': '♠' };
 
-// Initialize Game
+// ====== AUTO-SAVE ======
+const SAVE_KEY = 'blackjack_save';
+
+function saveGame() {
+    const saveData = {
+        deck,
+        playerHands,
+        dealerHand,
+        activeHandIndex,
+        wins,
+        losses,
+        pushes,
+        gameOver,
+        hasDoubledDown,
+        balance,
+        currentBet,
+        // Save chip visual info for the bet area
+        betChips: Array.from(chipContainerBet.querySelectorAll('.chip')).map(c => ({
+            className: c.className,
+            value: c.getAttribute('data-value'),
+            text: c.querySelector('span').textContent
+        }))
+    };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
+}
+
+function hasSave() {
+    return !!localStorage.getItem(SAVE_KEY);
+}
+
+function loadGame() {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+    try {
+        const s = JSON.parse(raw);
+        deck = s.deck;
+        playerHands = s.playerHands;
+        dealerHand = s.dealerHand;
+        activeHandIndex = s.activeHandIndex;
+        wins = s.wins;
+        losses = s.losses;
+        pushes = s.pushes;
+        gameOver = s.gameOver;
+        hasDoubledDown = s.hasDoubledDown;
+        balance = s.balance;
+        currentBet = s.currentBet;
+
+        // Restore bet chips visually
+        chipContainerBet.innerHTML = '';
+        (s.betChips || []).forEach(chip => {
+            const el = document.createElement('div');
+            el.className = chip.className;
+            el.setAttribute('data-value', chip.value);
+            el.innerHTML = `<span>${chip.text}</span>`;
+            el.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                if (!gameOver) return;
+                removeBet(el, parseInt(chip.value));
+            });
+            chipContainerBet.appendChild(el);
+        });
+
+        // Update stat displays
+        winsCountEl.textContent = wins;
+        lossesCountEl.textContent = losses;
+        pushesCountEl.textContent = pushes;
+
+        // Set button states
+        btnDeal.disabled = currentBet === 0 || !gameOver;
+        btnHit.disabled = gameOver;
+        btnStand.disabled = gameOver;
+        btnSplit.disabled = true;
+        btnDouble.disabled = true;
+
+        if (!gameOver) {
+            checkSplitAvailability();
+            checkDoubleAvailability();
+        }
+
+        renderHands();
+        updateBetUI();
+        return true;
+    } catch (e) {
+        console.error('Failed to load save:', e);
+        localStorage.removeItem(SAVE_KEY);
+        return false;
+    }
+}
+
+function clearSave() {
+    localStorage.removeItem(SAVE_KEY);
+}
+
+// ====== MENU LOGIC ======
+function showMenu() {
+    mainMenu.classList.remove('hidden');
+    gameScreen.classList.add('hidden');
+
+    // Enable continue only if a save exists
+    btnMenuContinue.disabled = !hasSave();
+}
+
+function showGame() {
+    mainMenu.classList.add('hidden');
+    gameScreen.classList.remove('hidden');
+}
+
+btnMenuContinue.addEventListener('click', () => {
+    showGame();
+    loadGame();
+});
+
+btnMenuNew.addEventListener('click', () => {
+    clearSave();
+    showGame();
+    fullReset();
+});
+
+// Auto-save whenever the user leaves the page
+window.addEventListener('beforeunload', () => {
+    saveGame();
+});
+
+// ====== INIT ======
 function initGame() {
     btnDeal.addEventListener('click', startNewGame);
     btnHit.addEventListener('click', playerHit);
     btnStand.addEventListener('click', playerStand);
     btnSplit.addEventListener('click', splitHand);
     btnDouble.addEventListener('click', doubleDown);
-    btnNewGame.addEventListener('click', resetFullGame);
-    
+    btnNewGame.addEventListener('click', () => {
+        clearSave();
+        fullReset();
+    });
+
     const bankChips = chipContainerBank.querySelectorAll('.chip');
     bankChips.forEach(chip => {
         chip.addEventListener('click', () => {
@@ -57,14 +188,17 @@ function initGame() {
             placeBet(parseInt(chip.getAttribute('data-value')), chip.className, chip.querySelector('span').textContent);
         });
     });
+
+    // Show menu on load
+    showMenu();
 }
 
+// ====== BETTING UI ======
 function updateBetUI() {
     balanceEl.textContent = balance;
     currentBetEl.textContent = currentBet;
-    
     btnDeal.disabled = currentBet === 0 || !gameOver;
-    
+
     if (balance === 0 && currentBet === 0 && gameOver) {
         showGameOver();
     }
@@ -74,19 +208,31 @@ function showGameOver() {
     gameOverOverlay.classList.remove('hidden');
 }
 
-function resetFullGame() {
+function fullReset() {
     balance = 250;
     currentBet = 0;
     wins = 0;
     losses = 0;
     pushes = 0;
     hasDoubledDown = false;
+    deck = [];
+    playerHands = [];
+    dealerHand = [];
+    activeHandIndex = 0;
+    gameOver = true;
     winsCountEl.textContent = '0';
     lossesCountEl.textContent = '0';
     pushesCountEl.textContent = '0';
     chipContainerBet.innerHTML = '';
     gameOverOverlay.classList.add('hidden');
+    dealerCardsEl.innerHTML = '';
+    playerCardsEl.innerHTML = '';
+    dealerScoreEl.textContent = '?';
     gameMessageEl.textContent = 'Place your bet and deal!';
+    btnHit.disabled = true;
+    btnStand.disabled = true;
+    btnSplit.disabled = true;
+    btnDouble.disabled = true;
     updateBetUI();
 }
 
@@ -94,18 +240,18 @@ function placeBet(value, className, text) {
     if (balance >= value) {
         balance -= value;
         currentBet += value;
-        
+
         const betChip = document.createElement('div');
         betChip.className = className;
         betChip.innerHTML = `<span>${text}</span>`;
         betChip.setAttribute('data-value', value);
-        
+
         betChip.addEventListener('contextmenu', (e) => {
             e.preventDefault();
-            if (!gameOver && playerHands.length > 0) return; 
+            if (!gameOver && playerHands.length > 0) return;
             removeBet(betChip, value);
         });
-        
+
         chipContainerBet.appendChild(betChip);
         updateBetUI();
     }
@@ -118,6 +264,7 @@ function removeBet(chipElement, value) {
     updateBetUI();
 }
 
+// ====== DECK ======
 function createDeck() {
     deck = [];
     for (let suit of suits) {
@@ -137,12 +284,13 @@ function shuffleDeck() {
     }
 }
 
+// ====== GAME LOGIC ======
 function startNewGame() {
     if (currentBet === 0) return;
-    
+
     createDeck();
     shuffleDeck();
-    
+
     playerHands = [{
         cards: [deck.pop(), deck.pop()],
         status: 'active',
@@ -151,19 +299,19 @@ function startNewGame() {
     activeHandIndex = 0;
     dealerHand = [deck.pop(), deck.pop()];
     hasDoubledDown = false;
-    
+
     gameOver = false;
-    
+
     btnDeal.disabled = true;
     btnHit.disabled = false;
     btnStand.disabled = false;
     btnSplit.disabled = true;
     btnDouble.disabled = true;
-    
+
     renderHands();
     checkSplitAvailability();
     checkDoubleAvailability();
-    
+
     if (!btnSplit.disabled && !btnDouble.disabled) {
         gameMessageEl.textContent = "Your turn! Hit, Stand, Split, or Double Down?";
     } else if (!btnSplit.disabled) {
@@ -173,7 +321,7 @@ function startNewGame() {
     } else {
         gameMessageEl.textContent = "Your turn! Hit or Stand?";
     }
-    
+
     checkInitialBlackjack();
 }
 
@@ -212,34 +360,32 @@ function createCardElement(card, hidden = false) {
 function renderHands() {
     dealerCardsEl.innerHTML = '';
     playerCardsEl.innerHTML = '';
-    
-    // Render Player Hands
+
     playerHands.forEach((hand, index) => {
         const handScore = calculateScore(hand.cards);
-        
+
         const handDiv = document.createElement('div');
         handDiv.className = 'hand-container';
         if (index === activeHandIndex && !gameOver) {
             handDiv.classList.add('active-hand');
         }
-        
+
         const scoreDiv = document.createElement('div');
         scoreDiv.className = 'hand-score';
         scoreDiv.textContent = `Hand ${index + 1}: ${handScore} ${hand.status !== 'active' ? `(${hand.status.toUpperCase()})` : ''}`;
-        
+
         const cardsDiv = document.createElement('div');
         cardsDiv.className = 'cards-container';
         hand.cards.forEach(card => cardsDiv.appendChild(createCardElement(card)));
-        
+
         handDiv.appendChild(scoreDiv);
         handDiv.appendChild(cardsDiv);
         playerCardsEl.appendChild(handDiv);
     });
-    
-    // Render Dealer
+
     dealerScore = calculateScore(dealerHand);
     if (gameOver) {
-        dealerScoreEl.textContent = dealerScore;
+        dealerScoreEl.textContent = dealerScore || '?';
         dealerHand.forEach(card => dealerCardsEl.appendChild(createCardElement(card)));
     } else {
         dealerScoreEl.textContent = "?";
@@ -253,10 +399,9 @@ function checkSplitAvailability() {
         btnSplit.disabled = true;
         return;
     }
-    
     const activeHand = playerHands[activeHandIndex];
-    if (activeHand.cards.length === 2 && 
-        activeHand.cards[0].value === activeHand.cards[1].value && 
+    if (activeHand.cards.length === 2 &&
+        activeHand.cards[0].value === activeHand.cards[1].value &&
         balance >= activeHand.bet) {
         btnSplit.disabled = false;
     } else {
@@ -269,9 +414,7 @@ function checkDoubleAvailability() {
         btnDouble.disabled = true;
         return;
     }
-    
     const activeHand = playerHands[activeHandIndex];
-    // Can only double on first 2 cards, and need enough balance
     if (activeHand.cards.length === 2 && balance >= activeHand.bet) {
         btnDouble.disabled = false;
     } else {
@@ -281,29 +424,27 @@ function checkDoubleAvailability() {
 
 function splitHand() {
     const activeHand = playerHands[activeHandIndex];
-    
-    // Deduct the secondary bet from balance
     balance -= activeHand.bet;
     updateBetUI();
-    
+
     const card1 = activeHand.cards[0];
     const card2 = activeHand.cards[1];
-    
+
     const newHand1 = { cards: [card1, deck.pop()], status: 'active', bet: activeHand.bet };
     const newHand2 = { cards: [card2, deck.pop()], status: 'active', bet: activeHand.bet };
-    
-    // Replace current hand with the two new split hands
+
     playerHands.splice(activeHandIndex, 1, newHand1, newHand2);
-    
+
     renderHands();
     checkSplitAvailability();
+    checkDoubleAvailability();
 }
 
 function checkInitialBlackjack() {
     if (playerHands.length === 1) {
         const pScore = calculateScore(playerHands[0].cards);
         const dScore = calculateScore(dealerHand);
-        
+
         if (pScore === 21 && dScore === 21) {
             playerHands[0].status = 'push';
             processRoundOver("Double Blackjack! It's a Push.");
@@ -318,11 +459,11 @@ function checkInitialBlackjack() {
 }
 
 function playerHit() {
-    btnDouble.disabled = true; // Can't double after hitting
+    btnDouble.disabled = true;
     const hand = playerHands[activeHandIndex];
     hand.cards.push(deck.pop());
     renderHands();
-    
+
     if (calculateScore(hand.cards) > 21) {
         hand.status = 'busted';
         moveToNextHand();
@@ -333,36 +474,32 @@ function playerHit() {
 
 function doubleDown() {
     if (hasDoubledDown) return;
-    
+
     const hand = playerHands[activeHandIndex];
-    
-    // Deduct extra bet equal to original bet
     balance -= hand.bet;
     hand.bet *= 2;
     hasDoubledDown = true;
     btnDouble.disabled = true;
     btnSplit.disabled = true;
-    
-    // Visually clone all current bet chips and add them to the bet area
+
+    // Visually clone bet chips to show doubled bet
     const existingChips = Array.from(chipContainerBet.querySelectorAll('.chip'));
     existingChips.forEach(chip => {
         const clone = chip.cloneNode(true);
         const value = parseInt(clone.getAttribute('data-value'));
-        clone.addEventListener('contextmenu', (e) => e.preventDefault()); // no removing during game
+        clone.addEventListener('contextmenu', (e) => e.preventDefault());
         chipContainerBet.appendChild(clone);
         currentBet += value;
     });
-    
-    // Draw exactly one card then auto-stand
+
     hand.cards.push(deck.pop());
     renderHands();
     updateBetUI();
-    
+
     if (calculateScore(hand.cards) > 21) {
         hand.status = 'busted';
         moveToNextHand();
     } else {
-        // Auto-stand after double down
         playerStand();
     }
 }
@@ -377,6 +514,7 @@ function moveToNextHand() {
         activeHandIndex++;
         renderHands();
         checkSplitAvailability();
+        checkDoubleAvailability();
     } else {
         playDealerTurn();
     }
@@ -388,16 +526,15 @@ function playDealerTurn() {
     btnSplit.disabled = true;
     btnDouble.disabled = true;
     btnDeal.disabled = true;
-    
-    // Check if ALL hands busted. If they did, dealer doesn't need to hit.
+
     const allBusted = playerHands.every(h => h.status === 'busted');
-    
+
     if (!allBusted) {
         while (calculateScore(dealerHand) < 17) {
             dealerHand.push(deck.pop());
         }
     }
-    
+
     renderHands();
     determineWinners();
 }
@@ -405,8 +542,7 @@ function playDealerTurn() {
 function determineWinners() {
     const dScore = calculateScore(dealerHand);
     let totalWon = 0;
-    
-    // Loop through all hands and evaluate payouts
+
     playerHands.forEach(hand => {
         if (hand.status === 'blackjack') {
             totalWon += (hand.bet * 2.5);
@@ -429,21 +565,21 @@ function determineWinners() {
             }
         }
     });
-    
+
     balance += totalWon;
     winsCountEl.textContent = wins;
     lossesCountEl.textContent = losses;
     pushesCountEl.textContent = pushes;
-    
+
     setTimeout(() => {
-        gameOver = true; // NOW betting is allowed again
+        gameOver = true;
         currentBet = 0;
         chipContainerBet.innerHTML = '';
-        
-        gameMessageEl.textContent = "Round Over! Total Winnings: $" + totalWon + ". Place your bet!";
-        
+
+        gameMessageEl.textContent = `Round Over! Winnings: $${totalWon}. Place your bet!`;
+
         updateBetUI();
-        renderHands(); // re-render to show updated win/loss status on each hand
+        renderHands();
     }, 1000);
 }
 
@@ -452,15 +588,14 @@ function processRoundOver(message) {
     btnStand.disabled = true;
     btnSplit.disabled = true;
     btnDouble.disabled = true;
-    btnDeal.disabled = true; 
-    
+    btnDeal.disabled = true;
+
     gameMessageEl.textContent = message;
-    
+
     setTimeout(() => {
         determineWinners();
     }, 1000);
 }
 
-// Start
+// ====== START ======
 initGame();
-updateBetUI();

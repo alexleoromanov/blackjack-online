@@ -5,73 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blackjack Online</title>
     <meta name="description" content="A premium, free-for-all online Blackjack experience.">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Alfa+Slab+One&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Game Over / 0 Balance Overlay -->
-    <div id="game-over-overlay" class="overlay hidden">
-        <button id="btn-new-game" class="btn primary huge">NEW GAME</button>
-    </div>
 
-    <!-- Bet Area (Top Left) -->
-    <div class="bet-area">
-        <div class="bet-label">Current Bet: $<span id="current-bet">0</span></div>
-        <div id="chip-container-bet" class="chip-container"></div>
-    </div>
-
-    <!-- Bank Area (Bottom Left) -->
-    <div class="bank-area">
-        <div class="bet-label">Bank: $<span id="current-balance">250</span></div>
-        <div id="chip-container-bank" class="chip-container">
-            <div class="chip chip-1" data-value="1"><span>1</span></div>
-            <div class="chip chip-10" data-value="10"><span>10</span></div>
-            <div class="chip chip-100" data-value="100"><span>100</span></div>
-            <div class="chip chip-500" data-value="500"><span>500</span></div>
-            <div class="chip chip-1k" data-value="1000"><span>1k</span></div>
-            <div class="chip chip-5k" data-value="5000"><span>5k</span></div>
-            <div class="chip chip-10k" data-value="10000"><span>10k</span></div>
-            <div class="chip chip-25k" data-value="25000"><span>25k</span></div>
+    <!-- ============ MAIN MENU ============ -->
+    <div id="main-menu" class="main-menu-overlay">
+        <div class="menu-box">
+            <div class="menu-title">
+                <span class="menu-title-top">21</span>
+                <span class="menu-title-main">BLACKJACK</span>
+                <span class="menu-title-sub">ONLINE</span>
+            </div>
+            <div class="menu-buttons">
+                <button id="btn-menu-continue" class="menu-btn continue-btn" disabled>
+                    <span class="menu-btn-label">CONTINUE</span>
+                    <span class="menu-btn-sub">Resume last game</span>
+                </button>
+                <button id="btn-menu-new" class="menu-btn new-btn">
+                    <span class="menu-btn-label">NEW GAME</span>
+                    <span class="menu-btn-sub">Start fresh</span>
+                </button>
+            </div>
         </div>
     </div>
 
-    <div class="app-container">
-        <header>
-            <h1>Blackjack <span>Online</span></h1>
-            <div class="score-board">
-                <div class="score-item">Wins: <span id="wins-count">0</span></div>
-                <div class="score-item">Losses: <span id="losses-count">0</span></div>
-                <div class="score-item">Pushes: <span id="pushes-count">0</span></div>
+    <!-- ============ GAME SCREEN ============ -->
+    <div id="game-screen" class="hidden">
+
+        <!-- Game Over / 0 Balance Overlay -->
+        <div id="game-over-overlay" class="overlay hidden">
+            <button id="btn-new-game" class="btn primary huge">NEW GAME</button>
+        </div>
+
+        <!-- Bet Area (Top Left) -->
+        <div class="bet-area">
+            <div class="bet-label">Current Bet: $<span id="current-bet">0</span></div>
+            <div id="chip-container-bet" class="chip-container"></div>
+        </div>
+
+        <!-- Bank Area (Bottom Left) -->
+        <div class="bank-area">
+            <div class="bet-label">Bank: $<span id="current-balance">250</span></div>
+            <div id="chip-container-bank" class="chip-container">
+                <div class="chip chip-1" data-value="1"><span>1</span></div>
+                <div class="chip chip-10" data-value="10"><span>10</span></div>
+                <div class="chip chip-100" data-value="100"><span>100</span></div>
+                <div class="chip chip-500" data-value="500"><span>500</span></div>
+                <div class="chip chip-1k" data-value="1000"><span>1k</span></div>
+                <div class="chip chip-5k" data-value="5000"><span>5k</span></div>
+                <div class="chip chip-10k" data-value="10000"><span>10k</span></div>
+                <div class="chip chip-25k" data-value="25000"><span>25k</span></div>
             </div>
-        </header>
+        </div>
 
-        <main class="game-board">
-            <section class="dealer-area">
-                <h2>Dealer <span id="dealer-score" class="score-badge">?</span></h2>
-                <div id="dealer-cards" class="cards-container">
-                    <!-- Dealer cards will appear here -->
+        <div class="app-container">
+            <header>
+                <h1>Blackjack <span>Online</span></h1>
+                <div class="score-board">
+                    <div class="score-item">Wins: <span id="wins-count">0</span></div>
+                    <div class="score-item">Losses: <span id="losses-count">0</span></div>
+                    <div class="score-item">Pushes: <span id="pushes-count">0</span></div>
                 </div>
-            </section>
+            </header>
 
-            <div class="game-message-container">
-                <h3 id="game-message">Place your bet and deal!</h3>
-            </div>
+            <main class="game-board">
+                <section class="dealer-area">
+                    <h2>Dealer <span id="dealer-score" class="score-badge">?</span></h2>
+                    <div id="dealer-cards" class="cards-container"></div>
+                </section>
 
-            <section class="player-area">
-                <h2>Player <span id="player-score" class="score-badge">0</span></h2>
-                <div id="player-cards">
-                    <!-- Player hand containers will appear here -->
+                <div class="game-message-container">
+                    <h3 id="game-message">Place your bet and deal!</h3>
                 </div>
-            </section>
-        </main>
 
-        <nav class="controls">
-            <button id="btn-deal" class="btn primary" disabled>Deal</button>
-            <button id="btn-hit" class="btn secondary" disabled>Hit</button>
-            <button id="btn-stand" class="btn secondary" disabled>Stand</button>
-            <button id="btn-split" class="btn secondary" disabled>Split</button>
-            <button id="btn-double" class="btn secondary" disabled>Double Down</button>
-        </nav>
+                <section class="player-area">
+                    <h2>Player <span id="player-score" class="score-badge">0</span></h2>
+                    <div id="player-cards"></div>
+                </section>
+            </main>
+
+            <nav class="controls">
+                <button id="btn-deal" class="btn primary" disabled>Deal</button>
+                <button id="btn-hit" class="btn secondary" disabled>Hit</button>
+                <button id="btn-stand" class="btn secondary" disabled>Stand</button>
+                <button id="btn-split" class="btn secondary" disabled>Split</button>
+                <button id="btn-double" class="btn secondary" disabled>Double Down</button>
+            </nav>
+        </div>
+
     </div>
 
     <script src="script.js"></script>
