@@ -611,3 +611,34 @@ h2 {
     background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
 }
 
+/* ====== DECORATIVE SUITS (Right Side) ====== */
+.suits-decoration {
+    position: fixed;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    z-index: 50;
+    pointer-events: none; /* Never blocks clicks */
+}
+
+.suit-deco {
+    font-size: 3.8rem;
+    opacity: 0.18;
+    line-height: 1;
+    transition: opacity 0.3s ease;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+}
+
+.suits-decoration:hover .suit-deco {
+    opacity: 0.28;
+}
+
+.suit-deco.spade   { color: #ffffff; }
+.suit-deco.club    { color: #c8d8e8; }
+.suit-deco.diamond { color: #ff6b6b; }
+.suit-deco.heart   { color: #ff4d6d; }
+
