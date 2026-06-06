@@ -187,7 +187,8 @@ function initGame() {
     btnDouble.addEventListener('click', doubleDown);
     btnNewGame.addEventListener('click', () => {
         clearSave();
-        fullReset();
+        gameOverOverlay.classList.add('hidden');
+        showMenu();
     });
 
     const bankChips = chipContainerBank.querySelectorAll('.chip');
