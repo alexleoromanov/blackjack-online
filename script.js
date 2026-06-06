@@ -8,6 +8,7 @@ let wins = 0;
 let losses = 0;
 let pushes = 0;
 let gameOver = true;
+let hasDoubledDown = false; // Can only double once per full game
 
 // Betting State
 let balance = 250;
@@ -22,6 +23,7 @@ const btnDeal = document.getElementById('btn-deal');
 const btnHit = document.getElementById('btn-hit');
 const btnStand = document.getElementById('btn-stand');
 const btnSplit = document.getElementById('btn-split');
+const btnDouble = document.getElementById('btn-double');
 const winsCountEl = document.getElementById('wins-count');
 const lossesCountEl = document.getElementById('losses-count');
 const pushesCountEl = document.getElementById('pushes-count');
@@ -45,6 +47,7 @@ function initGame() {
     btnHit.addEventListener('click', playerHit);
     btnStand.addEventListener('click', playerStand);
     btnSplit.addEventListener('click', splitHand);
+    btnDouble.addEventListener('click', doubleDown);
     btnNewGame.addEventListener('click', resetFullGame);
     
     const bankChips = chipContainerBank.querySelectorAll('.chip');
@@ -77,6 +80,7 @@ function resetFullGame() {
     wins = 0;
     losses = 0;
     pushes = 0;
+    hasDoubledDown = false;
     winsCountEl.textContent = '0';
     lossesCountEl.textContent = '0';
     pushesCountEl.textContent = '0';
@@ -146,6 +150,7 @@ function startNewGame() {
     }];
     activeHandIndex = 0;
     dealerHand = [deck.pop(), deck.pop()];
+    hasDoubledDown = false;
     
     gameOver = false;
     
@@ -153,12 +158,18 @@ function startNewGame() {
     btnHit.disabled = false;
     btnStand.disabled = false;
     btnSplit.disabled = true;
+    btnDouble.disabled = true;
     
     renderHands();
     checkSplitAvailability();
+    checkDoubleAvailability();
     
-    if (!btnSplit.disabled) {
+    if (!btnSplit.disabled && !btnDouble.disabled) {
+        gameMessageEl.textContent = "Your turn! Hit, Stand, Split, or Double Down?";
+    } else if (!btnSplit.disabled) {
         gameMessageEl.textContent = "Your turn! Hit, Stand, or Split?";
+    } else if (!btnDouble.disabled) {
+        gameMessageEl.textContent = "Your turn! Hit, Stand, or Double Down?";
     } else {
         gameMessageEl.textContent = "Your turn! Hit or Stand?";
     }
@@ -253,6 +264,21 @@ function checkSplitAvailability() {
     }
 }
 
+function checkDoubleAvailability() {
+    if (gameOver || hasDoubledDown || activeHandIndex >= playerHands.length) {
+        btnDouble.disabled = true;
+        return;
+    }
+    
+    const activeHand = playerHands[activeHandIndex];
+    // Can only double on first 2 cards, and need enough balance
+    if (activeHand.cards.length === 2 && balance >= activeHand.bet) {
+        btnDouble.disabled = false;
+    } else {
+        btnDouble.disabled = true;
+    }
+}
+
 function splitHand() {
     const activeHand = playerHands[activeHandIndex];
     
@@ -292,6 +318,7 @@ function checkInitialBlackjack() {
 }
 
 function playerHit() {
+    btnDouble.disabled = true; // Can't double after hitting
     const hand = playerHands[activeHandIndex];
     hand.cards.push(deck.pop());
     renderHands();
@@ -301,6 +328,32 @@ function playerHit() {
         moveToNextHand();
     } else {
         checkSplitAvailability();
+    }
+}
+
+function doubleDown() {
+    if (hasDoubledDown) return;
+    
+    const hand = playerHands[activeHandIndex];
+    
+    // Deduct extra bet equal to original bet
+    balance -= hand.bet;
+    hand.bet *= 2;
+    hasDoubledDown = true;
+    btnDouble.disabled = true;
+    btnSplit.disabled = true;
+    
+    // Draw exactly one card then auto-stand
+    hand.cards.push(deck.pop());
+    renderHands();
+    updateBetUI();
+    
+    if (calculateScore(hand.cards) > 21) {
+        hand.status = 'busted';
+        moveToNextHand();
+    } else {
+        // Auto-stand after double down
+        playerStand();
     }
 }
 
@@ -323,6 +376,7 @@ function playDealerTurn() {
     btnHit.disabled = true;
     btnStand.disabled = true;
     btnSplit.disabled = true;
+    btnDouble.disabled = true;
     btnDeal.disabled = true;
     
     // Check if ALL hands busted. If they did, dealer doesn't need to hit.
@@ -387,6 +441,7 @@ function processRoundOver(message) {
     btnHit.disabled = true;
     btnStand.disabled = true;
     btnSplit.disabled = true;
+    btnDouble.disabled = true;
     btnDeal.disabled = true; 
     
     gameMessageEl.textContent = message;
