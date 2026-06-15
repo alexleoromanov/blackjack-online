@@ -611,34 +611,22 @@ h2 {
     background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
 }
 
-/* ====== DECORATIVE SUITS (Right Side) ====== */
-.suits-decoration {
-    position: fixed;
-    right: 1.5rem;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    z-index: 50;
-    pointer-events: none; /* Never blocks clicks */
+.shop-btn {
+    background: linear-gradient(135deg, #3b0764 0%, #1e1b4b 100%);
+    color: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(168, 85, 247, 0.4);
+    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.2);
 }
 
-.suit-deco {
-    font-size: 3.8rem;
-    opacity: 0.18;
-    line-height: 1;
-    transition: opacity 0.3s ease;
-    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+.shop-btn:disabled {
+    opacity: 0.75;
 }
 
-.suits-decoration:hover .suit-deco {
-    opacity: 0.28;
+.shop-btn .neon-text {
+    color: #f472b6;
+    text-shadow: 0 0 8px #f472b6, 0 0 20px rgba(244, 114, 182, 0.6);
+    opacity: 1;
+    font-weight: 800;
 }
 
-.suit-deco.spade   { color: #ffffff; }
-.suit-deco.club    { color: #c8d8e8; }
-.suit-deco.diamond { color: #ff6b6b; }
-.suit-deco.heart   { color: #ff4d6d; }
 
