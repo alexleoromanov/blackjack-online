@@ -656,26 +656,26 @@ h2 {
 }
 
 .suit-icon.spade {
-    color: #38bdf8; /* Cyan neon */
-    text-shadow: 0 0 20px rgba(56, 189, 248, 0.5), 0 0 40px rgba(56, 189, 248, 0.2);
+    color: #111111; /* Black */
+    text-shadow: 0 0 20px rgba(56, 189, 248, 0.7), 0 0 40px rgba(56, 189, 248, 0.4);
     animation: floatSuitLeft 6s ease-in-out infinite alternate;
 }
 
 .suit-icon.club {
-    color: #34d399; /* Emerald neon */
-    text-shadow: 0 0 20px rgba(52, 211, 153, 0.5), 0 0 40px rgba(52, 211, 153, 0.2);
+    color: #111111; /* Black */
+    text-shadow: 0 0 20px rgba(52, 211, 153, 0.7), 0 0 40px rgba(52, 211, 153, 0.4);
     animation: floatSuitLeft 7s ease-in-out infinite alternate-reverse;
 }
 
 .suit-icon.diamond {
-    color: #f43f5e; /* Rose neon */
-    text-shadow: 0 0 20px rgba(244, 63, 94, 0.5), 0 0 40px rgba(244, 63, 94, 0.2);
+    color: #dc2626; /* Red */
+    text-shadow: 0 0 20px rgba(244, 63, 94, 0.7), 0 0 40px rgba(244, 63, 94, 0.4);
     animation: floatSuitRight 6.5s ease-in-out infinite alternate;
 }
 
 .suit-icon.heart {
-    color: #fbbf24; /* Gold neon */
-    text-shadow: 0 0 20px rgba(251, 191, 36, 0.5), 0 0 40px rgba(251, 191, 36, 0.2);
+    color: #dc2626; /* Red */
+    text-shadow: 0 0 20px rgba(251, 191, 36, 0.7), 0 0 40px rgba(251, 191, 36, 0.4);
     animation: floatSuitRight 7.5s ease-in-out infinite alternate-reverse;
 }
 
