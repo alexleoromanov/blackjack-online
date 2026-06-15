@@ -1,0 +1,12 @@
+{
+  "name": "blackjack-online",
+  "version": "1.0.0",
+  "description": "Premium Blackjack Online Game",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
