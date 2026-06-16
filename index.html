@@ -113,6 +113,45 @@
 
     </div>
 
+    <!-- Admin Button (always visible, tiny) -->
+    <button id="btn-admin" class="admin-trigger">Admin</button>
+
+    <!-- Admin Login -->
+    <div id="admin-login" class="admin-overlay hidden">
+        <div class="admin-login-box">
+            <h3>🔒 Admin Access</h3>
+            <input type="password" id="admin-password" placeholder="Enter password..." autocomplete="off">
+            <div class="admin-login-btns">
+                <button id="admin-login-submit">Enter</button>
+                <button id="admin-login-cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="admin-panel" class="admin-overlay hidden">
+        <div class="admin-panel-box">
+            <h3>⚡ Admin Panel</h3>
+            <div class="admin-controls">
+                <div class="admin-row">
+                    <label>Set Balance: $</label>
+                    <input type="number" id="admin-set-balance" value="10000" min="0">
+                    <button id="admin-btn-set-balance">Set</button>
+                </div>
+                <div class="admin-row">
+                    <label>Add Balance: $</label>
+                    <input type="number" id="admin-add-balance" value="1000" min="0">
+                    <button id="admin-btn-add-balance">Add</button>
+                </div>
+                <div class="admin-row">
+                    <label>Reset Stats</label>
+                    <button id="admin-btn-reset-stats">Reset W/L/P</button>
+                </div>
+            </div>
+            <button id="admin-close" class="admin-close-btn">Close</button>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>

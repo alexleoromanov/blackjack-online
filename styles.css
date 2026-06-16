@@ -705,5 +705,175 @@ h2 {
     }
 }
 
+/* ====== ADMIN PANEL ====== */
+.admin-trigger {
+    position: fixed;
+    bottom: 8px;
+    right: 8px;
+    z-index: 99999;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.15);
+    font-size: 0.6rem;
+    font-family: 'Outfit', sans-serif;
+    padding: 3px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
 
+.admin-trigger:hover {
+    color: rgba(255, 255, 255, 0.5);
+    border-color: rgba(255, 255, 255, 0.2);
+}
 
+.admin-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100000;
+    transition: opacity 0.3s ease;
+}
+
+.admin-overlay.hidden {
+    display: none;
+}
+
+.admin-login-box, .admin-panel-box {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 2px solid rgba(168, 85, 247, 0.4);
+    border-radius: 16px;
+    padding: 2rem;
+    min-width: 320px;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(168, 85, 247, 0.15);
+}
+
+.admin-login-box h3, .admin-panel-box h3 {
+    font-family: 'Alfa Slab One', serif;
+    font-size: 1.4rem;
+    color: #a855f7;
+    text-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
+    margin-bottom: 1.5rem;
+    letter-spacing: 2px;
+}
+
+.admin-login-box input, .admin-panel-box input {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s;
+}
+
+.admin-login-box input:focus, .admin-panel-box input:focus {
+    border-color: #a855f7;
+}
+
+.admin-login-btns {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.admin-login-btns button, .admin-close-btn {
+    padding: 0.5rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+#admin-login-submit {
+    background: linear-gradient(135deg, #a855f7, #7c3aed);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+}
+
+#admin-login-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(168, 85, 247, 0.4);
+}
+
+#admin-login-cancel {
+    background: rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+}
+
+#admin-login-cancel:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.admin-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.admin-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.admin-row label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #cbd5e1;
+    white-space: nowrap;
+}
+
+.admin-row input {
+    width: 100px;
+    margin-bottom: 0;
+    text-align: center;
+}
+
+.admin-row button {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: none;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    background: linear-gradient(135deg, #a855f7, #7c3aed);
+    color: #fff;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.admin-row button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+}
+
+.admin-close-btn {
+    background: rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    width: 100%;
+}
+
+.admin-close-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}

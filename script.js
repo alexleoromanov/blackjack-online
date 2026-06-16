@@ -649,3 +649,75 @@ function processRoundOver(message) {
 
 // ====== START ======
 initGame();
+
+// ====== ADMIN PANEL ======
+const ADMIN_PASSWORD = 'alex21';
+let adminUnlocked = false;
+
+const btnAdmin = document.getElementById('btn-admin');
+const adminLogin = document.getElementById('admin-login');
+const adminPanel = document.getElementById('admin-panel');
+const adminPasswordInput = document.getElementById('admin-password');
+const adminLoginSubmit = document.getElementById('admin-login-submit');
+const adminLoginCancel = document.getElementById('admin-login-cancel');
+const adminClose = document.getElementById('admin-close');
+
+btnAdmin.addEventListener('click', () => {
+    if (adminUnlocked) {
+        adminPanel.classList.remove('hidden');
+    } else {
+        adminLogin.classList.remove('hidden');
+        adminPasswordInput.value = '';
+        adminPasswordInput.focus();
+    }
+});
+
+adminLoginSubmit.addEventListener('click', () => {
+    if (adminPasswordInput.value === ADMIN_PASSWORD) {
+        adminUnlocked = true;
+        adminLogin.classList.add('hidden');
+        adminPanel.classList.remove('hidden');
+    } else {
+        adminPasswordInput.value = '';
+        adminPasswordInput.placeholder = 'Wrong password...';
+        adminPasswordInput.focus();
+    }
+});
+
+adminPasswordInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') adminLoginSubmit.click();
+});
+
+adminLoginCancel.addEventListener('click', () => {
+    adminLogin.classList.add('hidden');
+});
+
+adminClose.addEventListener('click', () => {
+    adminPanel.classList.add('hidden');
+});
+
+// Admin actions
+document.getElementById('admin-btn-set-balance').addEventListener('click', () => {
+    const val = parseInt(document.getElementById('admin-set-balance').value);
+    if (!isNaN(val) && val >= 0) {
+        balance = val;
+        updateBetUI();
+    }
+});
+
+document.getElementById('admin-btn-add-balance').addEventListener('click', () => {
+    const val = parseInt(document.getElementById('admin-add-balance').value);
+    if (!isNaN(val) && val >= 0) {
+        balance += val;
+        updateBetUI();
+    }
+});
+
+document.getElementById('admin-btn-reset-stats').addEventListener('click', () => {
+    wins = 0;
+    losses = 0;
+    pushes = 0;
+    winsCountEl.textContent = '0';
+    lossesCountEl.textContent = '0';
+    pushesCountEl.textContent = '0';
+});
