@@ -16,6 +16,7 @@ let losses = 0;
 let pushes = 0;
 let gameOver = true;
 let hasDoubledDown = false;
+let revealDealer = false;
 
 // Betting State
 let balance = 250;
@@ -25,6 +26,7 @@ let currentBet = 0;
 const dealerCardsEl = document.getElementById('dealer-cards');
 const playerCardsEl = document.getElementById('player-cards');
 const dealerScoreEl = document.getElementById('dealer-score');
+const playerScoreEl = document.getElementById('player-score');
 const gameMessageEl = document.getElementById('game-message');
 const btnDeal = document.getElementById('btn-deal');
 const btnHit = document.getElementById('btn-hit');
@@ -225,6 +227,7 @@ function fullReset() {
     losses = 0;
     pushes = 0;
     hasDoubledDown = false;
+    revealDealer = false;
     deck = [];
     playerHands = [];
     dealerHand = [];
@@ -238,6 +241,7 @@ function fullReset() {
     dealerCardsEl.innerHTML = '';
     playerCardsEl.innerHTML = '';
     dealerScoreEl.textContent = '?';
+    playerScoreEl.textContent = '0';
     gameMessageEl.textContent = 'Place your bet and deal!';
     btnHit.disabled = true;
     btnStand.disabled = true;
@@ -309,6 +313,7 @@ function startNewGame() {
     activeHandIndex = 0;
     dealerHand = [deck.pop(), deck.pop()];
     hasDoubledDown = false;
+    revealDealer = false;
 
     gameOver = false;
 
@@ -393,8 +398,16 @@ function renderHands() {
         playerCardsEl.appendChild(handDiv);
     });
 
+    // Update main player score badge with active hand score
+    if (playerHands.length > 0 && activeHandIndex < playerHands.length) {
+        const activeHand = playerHands[activeHandIndex];
+        playerScoreEl.textContent = calculateScore(activeHand.cards);
+    } else {
+        playerScoreEl.textContent = '0';
+    }
+
     dealerScore = calculateScore(dealerHand);
-    if (gameOver) {
+    if (gameOver || revealDealer) {
         dealerScoreEl.textContent = dealerScore || '?';
         dealerHand.forEach(card => dealerCardsEl.appendChild(createCardElement(card)));
     } else {
@@ -411,7 +424,7 @@ function checkSplitAvailability() {
     }
     const activeHand = playerHands[activeHandIndex];
     if (activeHand.cards.length === 2 &&
-        activeHand.cards[0].value === activeHand.cards[1].value &&
+        activeHand.cards[0].weight === activeHand.cards[1].weight &&
         balance >= activeHand.bet) {
         btnSplit.disabled = false;
     } else {
@@ -539,14 +552,39 @@ function playDealerTurn() {
 
     const allBusted = playerHands.every(h => h.status === 'busted');
 
-    if (!allBusted) {
-        while (calculateScore(dealerHand) < 17) {
-            dealerHand.push(deck.pop());
+    if (allBusted) {
+        // Just reveal dealer cards instantly if all hands busted
+        revealDealer = true;
+        renderHands();
+        determineWinners();
+        return;
+    }
+
+    // Step 1: Reveal the hidden card
+    gameMessageEl.textContent = "Dealer's turn...";
+    revealDealer = true;
+    renderHands();
+
+    // Step 2: Draw cards one at a time with delay
+    function dealerDrawNext() {
+        if (calculateScore(dealerHand) < 17) {
+            setTimeout(() => {
+                dealerHand.push(deck.pop());
+                renderHands();
+                dealerDrawNext();
+            }, 800);
+        } else {
+            // Done drawing, determine winners
+            setTimeout(() => {
+                determineWinners();
+            }, 500);
         }
     }
 
-    renderHands();
-    determineWinners();
+    // Start drawing after a short pause to let the player see the revealed card
+    setTimeout(() => {
+        dealerDrawNext();
+    }, 800);
 }
 
 function determineWinners() {
@@ -600,6 +638,8 @@ function processRoundOver(message) {
     btnDouble.disabled = true;
     btnDeal.disabled = true;
 
+    revealDealer = true;
+    renderHands();
     gameMessageEl.textContent = message;
 
     setTimeout(() => {
