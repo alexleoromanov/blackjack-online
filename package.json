@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "build": "echo 'No build required'"
+    "build": "mkdir -p public && cp index.html styles.css script.js public/"
   },
   "keywords": [],
   "author": "",
