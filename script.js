@@ -18,6 +18,7 @@ let gameOver = true;
 let hasDoubledDown = false;
 let revealDealer = false;
 let forceBlackjack = false;
+let discoMode = false;
 
 // Betting State
 let balance = 250;
@@ -306,7 +307,9 @@ function startNewGame() {
     createDeck();
     shuffleDeck();
 
-    if (forceBlackjack) {
+    const shouldDiscoBlackjack = discoMode && Math.random() < 0.25;
+
+    if (forceBlackjack || shouldDiscoBlackjack) {
         // Find an Ace and a 10-value card from the deck and deal them to the player
         const aceIdx = deck.findIndex(c => c.value === 'A');
         const ace = deck.splice(aceIdx, 1)[0];
@@ -317,11 +320,13 @@ function startNewGame() {
             status: 'active',
             bet: currentBet
         }];
-        forceBlackjack = false;
-        // Update toggle button UI
-        const btn = document.getElementById('admin-btn-force-bj');
-        btn.textContent = 'Force Blackjack: OFF';
-        btn.className = 'admin-btn-inactive';
+        if (forceBlackjack) {
+            forceBlackjack = false;
+            // Update toggle button UI
+            const btn = document.getElementById('admin-btn-force-bj');
+            btn.textContent = 'Force Blackjack: OFF';
+            btn.className = 'admin-btn-inactive';
+        }
     } else {
         playerHands = [{
             cards: [deck.pop(), deck.pop()],
@@ -750,5 +755,35 @@ document.getElementById('admin-btn-force-bj').addEventListener('click', () => {
     } else {
         btn.textContent = 'Force Blackjack: OFF';
         btn.className = 'admin-btn-inactive';
+    }
+});
+
+// Event Dashboard Logic
+const btnAdminEvents = document.getElementById('admin-btn-events');
+const eventDashboard = document.getElementById('event-dashboard');
+const eventDashboardClose = document.getElementById('event-dashboard-close');
+const btnEventDisco = document.getElementById('event-btn-disco');
+const discoBg = document.getElementById('disco-bg');
+
+btnAdminEvents.addEventListener('click', () => {
+    adminPanel.classList.add('hidden');
+    eventDashboard.classList.remove('hidden');
+});
+
+eventDashboardClose.addEventListener('click', () => {
+    eventDashboard.classList.add('hidden');
+    adminPanel.classList.remove('hidden');
+});
+
+btnEventDisco.addEventListener('click', () => {
+    discoMode = !discoMode;
+    if (discoMode) {
+        btnEventDisco.textContent = 'Disco: ON';
+        btnEventDisco.className = 'admin-btn-active';
+        discoBg.classList.add('active');
+    } else {
+        btnEventDisco.textContent = 'Disco: OFF';
+        btnEventDisco.className = 'admin-btn-inactive';
+        discoBg.classList.remove('active');
     }
 });

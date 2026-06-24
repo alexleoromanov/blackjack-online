@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div id="disco-bg"></div>
 
     <!-- ============ MAIN MENU ============ -->
     <div id="main-menu" class="main-menu-overlay">
@@ -151,8 +152,27 @@
                     <label>Next Hand</label>
                     <button id="admin-btn-force-bj" class="admin-btn-inactive">Force Blackjack: OFF</button>
                 </div>
+                <div class="admin-row">
+                    <label>Events</label>
+                    <button id="admin-btn-events" class="admin-btn-inactive" style="background: linear-gradient(135deg, #f59e0b, #d97706) !important; color: white !important;">Event Dashboard</button>
+                </div>
             </div>
             <button id="admin-close" class="admin-close-btn">Close</button>
+        </div>
+    </div>
+
+    <!-- Event Dashboard -->
+    <div id="event-dashboard" class="admin-overlay hidden">
+        <div class="admin-panel-box" style="border-color: #f59e0b; box-shadow: 0 0 40px rgba(245, 158, 11, 0.15);">
+            <h3 style="color: #f59e0b; text-shadow: 0 0 15px rgba(245, 158, 11, 0.5);">🎉 Event Dashboard</h3>
+            <div class="admin-controls">
+                <div class="admin-row" style="flex-direction: column; gap: 10px;">
+                    <label style="font-size: 1rem;">Disco Night Event</label>
+                    <p style="font-size: 0.75rem; color: #94a3b8; margin: 0;">Adds groovy background & +25% Blackjack chance!</p>
+                    <button id="event-btn-disco" class="admin-btn-inactive" style="padding: 1rem 2rem; font-size: 1.2rem;">Disco: OFF</button>
+                </div>
+            </div>
+            <button id="event-dashboard-close" class="admin-close-btn">Back to Game</button>
         </div>
     </div>
 
