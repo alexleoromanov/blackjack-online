@@ -1,5 +1,9 @@
+// ====== SUPABASE SETUP ======
+const supabaseUrl = 'https://hgtqzoalrlptdwkagerq.supabase.co';
+const supabaseKey = 'sb_publishable_n7SuZEjnciikTSPWpJC1IQ_5XoEuvbR';
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
 // ====== DOM: MENU ======
-const mainMenu = document.getElementById('main-menu');
 const gameScreen = document.getElementById('game-screen');
 const btnMenuContinue = document.getElementById('btn-menu-continue');
 const btnMenuDelete = document.getElementById('btn-menu-delete');
@@ -775,8 +779,20 @@ eventDashboardClose.addEventListener('click', () => {
     adminPanel.classList.remove('hidden');
 });
 
-btnEventDisco.addEventListener('click', () => {
-    discoMode = !discoMode;
+// Supabase Global Event Logic
+async function updateGlobalDiscoMode(newMode) {
+    const { error } = await supabase
+        .from('global_state')
+        .update({ is_active: newMode })
+        .eq('event_name', 'discoMode');
+    
+    if (error) {
+        console.error("Error updating global state:", error);
+    }
+}
+
+function applyDiscoMode(isActive) {
+    discoMode = isActive;
     if (discoMode) {
         btnEventDisco.textContent = 'Disco: ON';
         btnEventDisco.className = 'admin-btn-active';
@@ -786,4 +802,37 @@ btnEventDisco.addEventListener('click', () => {
         btnEventDisco.className = 'admin-btn-inactive';
         discoBg.classList.remove('active');
     }
+}
+
+// Fetch initial state
+async function fetchInitialEventState() {
+    const { data, error } = await supabase
+        .from('global_state')
+        .select('*')
+        .eq('event_name', 'discoMode')
+        .single();
+    
+    if (data) {
+        applyDiscoMode(data.is_active);
+    }
+}
+fetchInitialEventState();
+
+// Listen for realtime changes
+supabase
+    .channel('global_state_changes')
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'global_state' }, payload => {
+        if (payload.new.event_name === 'discoMode') {
+            applyDiscoMode(payload.new.is_active);
+        }
+    })
+    .subscribe();
+
+btnEventDisco.addEventListener('click', () => {
+    // Optimistically apply locally
+    const newMode = !discoMode;
+    applyDiscoMode(newMode);
+    // Push to Supabase
+    updateGlobalDiscoMode(newMode);
 });
+
