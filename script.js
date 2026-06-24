@@ -1,7 +1,16 @@
 // ====== SUPABASE SETUP ======
 const supabaseUrl = 'https://hgtqzoalrlptdwkagerq.supabase.co';
 const supabaseKey = 'sb_publishable_n7SuZEjnciikTSPWpJC1IQ_5XoEuvbR';
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+let supabase = null;
+try {
+    if (window.supabase) {
+        supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    } else {
+        console.warn("Supabase CDN blocked (AdBlocker?) - Global events disabled.");
+    }
+} catch (e) {
+    console.error("Failed to initialize Supabase:", e);
+}
 
 // ====== DOM: MENU ======
 const mainMenu = document.getElementById('main-menu');
@@ -782,6 +791,7 @@ eventDashboardClose.addEventListener('click', () => {
 
 // Supabase Global Event Logic
 async function updateGlobalDiscoMode(newMode) {
+    if (!supabase) return;
     const { error } = await supabase
         .from('global_state')
         .update({ is_active: newMode })
@@ -807,6 +817,7 @@ function applyDiscoMode(isActive) {
 
 // Fetch initial state
 async function fetchInitialEventState() {
+    if (!supabase) return;
     const { data, error } = await supabase
         .from('global_state')
         .select('*')
@@ -820,14 +831,16 @@ async function fetchInitialEventState() {
 fetchInitialEventState();
 
 // Listen for realtime changes
-supabase
-    .channel('global_state_changes')
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'global_state' }, payload => {
-        if (payload.new.event_name === 'discoMode') {
-            applyDiscoMode(payload.new.is_active);
-        }
-    })
-    .subscribe();
+if (supabase) {
+    supabase
+        .channel('global_state_changes')
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'global_state' }, payload => {
+            if (payload.new.event_name === 'discoMode') {
+                applyDiscoMode(payload.new.is_active);
+            }
+        })
+        .subscribe();
+}
 
 btnEventDisco.addEventListener('click', () => {
     // Optimistically apply locally
