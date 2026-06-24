@@ -877,3 +877,14 @@ h2 {
 .admin-close-btn:hover {
     background: rgba(255, 255, 255, 0.15);
 }
+
+.admin-btn-inactive {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #94a3b8 !important;
+}
+
+.admin-btn-active {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: #fff !important;
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.4) !important;
+}

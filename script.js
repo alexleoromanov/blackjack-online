@@ -17,6 +17,7 @@ let pushes = 0;
 let gameOver = true;
 let hasDoubledDown = false;
 let revealDealer = false;
+let forceBlackjack = false;
 
 // Betting State
 let balance = 250;
@@ -305,11 +306,29 @@ function startNewGame() {
     createDeck();
     shuffleDeck();
 
-    playerHands = [{
-        cards: [deck.pop(), deck.pop()],
-        status: 'active',
-        bet: currentBet
-    }];
+    if (forceBlackjack) {
+        // Find an Ace and a 10-value card from the deck and deal them to the player
+        const aceIdx = deck.findIndex(c => c.value === 'A');
+        const ace = deck.splice(aceIdx, 1)[0];
+        const tenIdx = deck.findIndex(c => c.weight === 10);
+        const ten = deck.splice(tenIdx, 1)[0];
+        playerHands = [{
+            cards: [ace, ten],
+            status: 'active',
+            bet: currentBet
+        }];
+        forceBlackjack = false;
+        // Update toggle button UI
+        const btn = document.getElementById('admin-btn-force-bj');
+        btn.textContent = 'Force Blackjack: OFF';
+        btn.className = 'admin-btn-inactive';
+    } else {
+        playerHands = [{
+            cards: [deck.pop(), deck.pop()],
+            status: 'active',
+            bet: currentBet
+        }];
+    }
     activeHandIndex = 0;
     dealerHand = [deck.pop(), deck.pop()];
     hasDoubledDown = false;
@@ -720,4 +739,16 @@ document.getElementById('admin-btn-reset-stats').addEventListener('click', () =>
     winsCountEl.textContent = '0';
     lossesCountEl.textContent = '0';
     pushesCountEl.textContent = '0';
+});
+
+document.getElementById('admin-btn-force-bj').addEventListener('click', () => {
+    forceBlackjack = !forceBlackjack;
+    const btn = document.getElementById('admin-btn-force-bj');
+    if (forceBlackjack) {
+        btn.textContent = 'Force Blackjack: ON';
+        btn.className = 'admin-btn-active';
+    } else {
+        btn.textContent = 'Force Blackjack: OFF';
+        btn.className = 'admin-btn-inactive';
+    }
 });
