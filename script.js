@@ -4,6 +4,7 @@ const supabaseKey = 'sb_publishable_n7SuZEjnciikTSPWpJC1IQ_5XoEuvbR';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 // ====== DOM: MENU ======
+const mainMenu = document.getElementById('main-menu');
 const gameScreen = document.getElementById('game-screen');
 const btnMenuContinue = document.getElementById('btn-menu-continue');
 const btnMenuDelete = document.getElementById('btn-menu-delete');
